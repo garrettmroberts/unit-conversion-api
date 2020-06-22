@@ -21,9 +21,38 @@ router
       const multiply = table[castTo];
       let converted = parseInt(splitReq[0])* multiply;
 
-      // Handles queries
+      // Handles precision query
       if (req.query.precision) {
         converted = parseFloat(converted.toFixed(parseInt(req.query.precision)));
+      };
+
+      // Sets standard convertedStr and sentence
+      let convertedStr = converted.toString() + castTo;
+      let sentence = `${splitReq[0]}${splitReq[1]} is equal to ${converted}${castTo}.`;
+
+      // Handles subunits query
+      if (req.query.subunits === 'true') {
+        let metricUnits = ['mm', 'cm', 'm', 'km'];
+        let imperialUnits = ['in', 'ft', 'yd', 'mi'];
+        let subunit;
+
+        if (imperialUnits.includes(req.params.to)) {
+          subunit = imperialUnits[imperialUnits.indexOf(req.params.to) - 1];
+        };
+
+        if (metricUnits.includes(req.params.to)) {
+          subunit = metricUnits[metricUnits.indexOf(req.params.to) - 1];
+        };
+
+        if (subunit != undefined) {
+          let decimal = parseFloat('0.' + converted.toString().split('.')[1]);
+          if (decimal) {
+            let subunitMeasure = (json[castTo][subunit] * decimal).toFixed(2);
+            convertedStr = `${converted.toFixed(0)}${castTo} and ${subunitMeasure}${subunit}`;
+            sentence = `${req.params.from} is equal to ${converted.toFixed(0)}${castTo} and ${subunitMeasure}${subunit}.`;
+          }
+          
+        }
       };
 
       // Send result
@@ -31,8 +60,9 @@ router
         "from": req.params.from,
         "to": req.params.to,
         "conversionRate": multiply,
-        "converted": converted,
-        "Sentence": `${splitReq[0]}${splitReq[1]} is equal to ${converted}${castTo}.`
+        "convertedInt": converted,
+        "convertedStr": convertedStr,
+        "Sentence": sentence
       })
 
     } catch(error) {
