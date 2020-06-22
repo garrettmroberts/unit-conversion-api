@@ -7,6 +7,7 @@ router
     try {
       const splitReq = req.params.from.split(/([a-z].+)/, 2);
       const castTo = req.params.to;
+      console.log(splitReq)
 
       // Valid input checking
       if (/[^\d.]+/.test(splitReq[0]) 
@@ -19,8 +20,8 @@ router
       // Converts units
       const table = json[splitReq[1]];
       const multiply = table[castTo];
-      let converted = parseInt(splitReq[0])* multiply;
-
+      let converted = parseFloat(splitReq[0])* multiply;
+      console.log(converted)
       // Handles precision query
       if (req.query.precision) {
         converted = parseFloat(converted.toFixed(parseInt(req.query.precision)));
